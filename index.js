@@ -201,6 +201,118 @@ async function run() {
       });
     });
 
+    // ================REPORTS================
+
+    // Get reports data
+    app.get("/reports", authGuard, async (req, res) => {
+      try {
+        const { email } = req.user;
+
+        // Get all user transactions
+        const allUserTransactions = await Transaction.find({
+          user_email: email,
+        }).toArray();
+
+        // Calculate totals from all transactions
+        let totalIncome = 0;
+        let totalExpenses = 0;
+
+        allUserTransactions.forEach((transaction) => {
+          const amount = parseFloat(transaction.amount) || 0;
+          if (transaction.type === "income") {
+            totalIncome += amount;
+          } else if (transaction.type === "expense") {
+            totalExpenses += amount;
+          }
+        });
+
+        const netBalance = totalIncome - totalExpenses;
+
+        // Calculate monthly breakdown for last 6 months (for bar chart)
+        const monthlyData = [];
+        for (let i = 5; i >= 0; i--) {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          const year = date.getFullYear();
+          const monthNum = date.getMonth() + 1;
+          const monthKey = `${year}-${String(monthNum).padStart(2, "0")}`;
+
+          const lastDay = new Date(year, monthNum, 0).getDate();
+          const monthStart = `${monthKey}-01`;
+          const monthEnd = `${monthKey}-${String(lastDay).padStart(2, "0")}`;
+
+          const monthTransactions = allUserTransactions.filter((t) => {
+            if (!t.date) return false;
+            const transactionDate = t.date;
+            return transactionDate >= monthStart && transactionDate <= monthEnd;
+          });
+
+          let monthIncome = 0;
+          let monthExpenses = 0;
+
+          monthTransactions.forEach((transaction) => {
+            const amount = parseFloat(transaction.amount) || 0;
+            if (transaction.type === "income") {
+              monthIncome += amount;
+            } else if (transaction.type === "expense") {
+              monthExpenses += amount;
+            }
+          });
+
+          monthlyData.push({
+            month: monthKey,
+            monthLabel: date.toLocaleDateString("en-US", {
+              month: "short",
+              year: "numeric",
+            }),
+            income: monthIncome,
+            expenses: monthExpenses,
+          });
+        }
+
+        // Calculate category breakdown for both income and expenses (for pie chart) - use all transactions
+        const categoryBreakdown = {};
+        allUserTransactions.forEach((transaction) => {
+          const categoryName = transaction.category || "Other";
+          const transactionType = transaction.type || "expense";
+          const amount = parseFloat(transaction.amount) || 0;
+
+          // Create a unique key that includes both category and type
+          const key = `${categoryName} (${transactionType})`;
+
+          categoryBreakdown[key] = (categoryBreakdown[key] || 0) + amount;
+        });
+
+        const categoryData = Object.entries(categoryBreakdown).map(
+          ([name, value]) => ({
+            name,
+            value: parseFloat(value.toFixed(2)),
+          })
+        );
+
+        return res.status(200).json({
+          success: true,
+          message: "Reports data retrieved successfully",
+          data: {
+            summary: {
+              totalIncome: parseFloat(totalIncome.toFixed(2)),
+              totalExpenses: parseFloat(totalExpenses.toFixed(2)),
+              netBalance: parseFloat(netBalance.toFixed(2)),
+            },
+            monthlyData,
+            categoryData,
+          },
+        });
+      } catch (error) {
+        console.log("Reports error:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to retrieve reports data",
+          error: error.message,
+        });
+      }
+    });
+
     console.log("Connected to MongoDB successfully!");
   } catch (error) {
     console.log("Error from mongodb", error);
