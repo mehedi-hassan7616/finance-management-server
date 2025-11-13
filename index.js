@@ -264,7 +264,6 @@ async function run() {
           });
         }
 
-        // Calculate category breakdown for both income and expenses (for pie chart) - use all transactions
         const categoryBreakdown = {};
         allUserTransactions.forEach((transaction) => {
           const categoryName = transaction.category || "Other";
