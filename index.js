@@ -134,7 +134,6 @@ async function run() {
       });
     });
 
-    // Update transaction
     app.patch("/transactions/:id", authGuard, async (req, res) => {
       const { id } = req.params;
       const payload = req.body;
