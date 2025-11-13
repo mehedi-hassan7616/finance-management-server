@@ -201,9 +201,6 @@ async function run() {
       });
     });
 
-    // ================REPORTS================
-
-    // Get reports data
     app.get("/reports", authGuard, async (req, res) => {
       try {
         const { email } = req.user;
