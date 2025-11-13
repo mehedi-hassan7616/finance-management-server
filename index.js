@@ -208,7 +208,6 @@ async function run() {
       try {
         const { email } = req.user;
 
-        // Get all user transactions
         const allUserTransactions = await Transaction.find({
           user_email: email,
         }).toArray();
