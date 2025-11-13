@@ -270,7 +270,6 @@ async function run() {
           const transactionType = transaction.type || "expense";
           const amount = parseFloat(transaction.amount) || 0;
 
-          // Create a unique key that includes both category and type
           const key = `${categoryName} (${transactionType})`;
 
           categoryBreakdown[key] = (categoryBreakdown[key] || 0) + amount;
