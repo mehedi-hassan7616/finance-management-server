@@ -209,7 +209,6 @@ async function run() {
           user_email: email,
         }).toArray();
 
-        // Calculate totals from all transactions
         let totalIncome = 0;
         let totalExpenses = 0;
 
