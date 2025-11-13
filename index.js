@@ -90,7 +90,6 @@ async function run() {
       });
     });
 
-    // Get transactions
     app.get("/transactions", authGuard, async (req, res) => {
       const { email } = req.user;
       const { type } = req.query;
