@@ -223,7 +223,6 @@ async function run() {
 
         const netBalance = totalIncome - totalExpenses;
 
-        // Calculate monthly breakdown for last 6 months (for bar chart)
         const monthlyData = [];
         for (let i = 5; i >= 0; i--) {
           const date = new Date();
