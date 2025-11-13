@@ -12,7 +12,10 @@ const URI = process.env.MONGODB_URI;
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "https://finance-management-92d57.web.app",
+    ],
   })
 );
 app.use(express.json());
